@@ -13,6 +13,7 @@ import {
   Loader2,
   Radio,
   Plus,
+  Navigation,
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -352,10 +353,21 @@ export default function FestivalDetailPage() {
 
           {/* Map Interactive OpenStreetMap */}
           <div className="bg-white/70 backdrop-blur-md border border-white/50 shadow-xl shadow-slate-100/50 rounded-3xl p-4 space-y-4">
-            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-indigo-600" />
-              <span>Plan d'accès</span>
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Layers className="w-4 h-4 text-indigo-600" />
+                <span>Plan d'accès</span>
+              </h2>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${coordinates[0]},${coordinates[1]}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition"
+              >
+                <Navigation className="w-3.5 h-3.5" />
+                <span>Y aller</span>
+              </a>
+            </div>
             <div className="h-64 rounded-2xl overflow-hidden border border-slate-100 relative z-0">
               {mapLoading ? (
                 <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center text-slate-400 text-xs">

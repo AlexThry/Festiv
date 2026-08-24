@@ -115,10 +115,11 @@ export default function EditFestivalModal() {
         </View>
 
         <View style={{ gap: 6 }}>
-          <Text className="text-xs font-bold text-slate-500">Lieu *</Text>
+          <Text className="text-xs font-bold text-slate-500">Adresse *</Text>
           <TextInput
             value={location}
             onChangeText={setLocation}
+            placeholder="ex: 12 Rue de la Paix, 75002 Paris"
             placeholderTextColor={colors.slate400}
             className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800"
           />

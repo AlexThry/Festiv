@@ -19,6 +19,11 @@ export const listFriendInvitations = async () => {
   return response.data;
 };
 
+export const listSentFriendInvitations = async () => {
+  const response = await axios.get(`${BASE}/friends/sent`, { headers: authHeaders() });
+  return response.data;
+};
+
 export const addFriend = async (email) => {
   const response = await axios.post(`${BASE}/friends`, { email }, { headers: authHeaders() });
   return response.data;

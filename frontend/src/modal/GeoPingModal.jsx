@@ -35,7 +35,7 @@ export default function GeoPingModal({ suiviId, onClose, onSaved, triggerToast }
         setError("Autorisez l'accès à votre position pour la partager.");
         setLoading(false);
       },
-      { enableHighAccuracy: false, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 15000 },
     );
   }, []);
 

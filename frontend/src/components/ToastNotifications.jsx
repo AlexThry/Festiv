@@ -4,7 +4,7 @@ export default function ToastNotifications({
     toasts
 }){
     return(
-        <div className="fixed bottom-6 right-6 z-100 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+        <div className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] sm:inset-x-auto sm:right-6 sm:bottom-6 z-100 flex flex-col gap-3 sm:max-w-sm sm:w-full pointer-events-none">
         {toasts.map(toast => (
           <div 
             key={toast.id}

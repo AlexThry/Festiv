@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Zap } from "lucide-react-native";
 import { colors } from "../theme/colors";
 import GlassCard from "./GlassCard";
@@ -11,11 +12,12 @@ const STYLES = {
 };
 
 export default function ToastStack({ toasts }) {
+  const insets = useSafeAreaInsets();
   if (!toasts.length) return null;
   return (
     <View
       pointerEvents="none"
-      style={{ position: "absolute", bottom: 24, left: 16, right: 16, gap: 8 }}
+      style={{ position: "absolute", bottom: insets.bottom + 70, left: 16, right: 16, gap: 8 }}
     >
       {toasts.map((toast) => {
         const style = STYLES[toast.type] || STYLES.info;

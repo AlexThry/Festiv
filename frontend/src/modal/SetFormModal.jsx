@@ -148,7 +148,7 @@ export default function SetFormModal({
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl w-full max-w-lg shadow-2xl relative max-h-[90dvh] overflow-y-auto scrollbar-none">
+      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl w-full max-w-lg shadow-2xl relative max-h-[90dvh] overflow-y-auto overflow-x-hidden scrollbar-none">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
@@ -190,22 +190,22 @@ export default function SetFormModal({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <label className="text-slate-500 font-bold">Heure début (optionnel) :</label>
               <input
                 type="time"
                 value={form.start_time}
                 onChange={(e) => setForm((prev) => ({ ...prev, start_time: e.target.value }))}
-                className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
+                className="w-full max-w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <label className="text-slate-500 font-bold">Heure fin (optionnel) :</label>
               <input
                 type="time"
                 value={form.end_time}
                 onChange={(e) => setForm((prev) => ({ ...prev, end_time: e.target.value }))}
-                className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
+                className="w-full max-w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
               />
             </div>
           </div>

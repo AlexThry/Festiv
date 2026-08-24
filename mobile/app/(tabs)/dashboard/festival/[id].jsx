@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Image, ScrollView, ActivityIndicator, Pressable, Linking } from "react-native";
+import { View, Text, Image, ScrollView, ActivityIndicator, Pressable, Linking, Platform } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import MapView, { Marker } from "react-native-maps";
@@ -11,6 +11,7 @@ import {
   Radio,
   Plus,
   ArrowUpRight,
+  Navigation,
 } from "lucide-react-native";
 import { HeaderIconButton, HeaderTextButton } from "../../../../src/components/nav/HeaderButtons";
 import { getFestivalById } from "../../../../src/api/festival";
@@ -67,6 +68,15 @@ export default function FestivalDetailScreen() {
     } catch {
       setCreatingLineup(false);
     }
+  };
+
+  const openInMaps = () => {
+    const url = Platform.select({
+      ios: `https://maps.apple.com/?daddr=${coordinates.latitude},${coordinates.longitude}&q=${encodeURIComponent(festival?.name || "")}`,
+      android: `google.navigation:q=${coordinates.latitude},${coordinates.longitude}`,
+      default: `https://www.google.com/maps/dir/?api=1&destination=${coordinates.latitude},${coordinates.longitude}`,
+    });
+    Linking.openURL(url);
   };
 
   const formatDate = (d) =>
@@ -240,7 +250,17 @@ export default function FestivalDetailScreen() {
         </GlassCard>
 
         <GlassCard className="p-4" style={{ gap: 10 }}>
-          <Text className="text-sm font-bold text-slate-900">Plan d'accès</Text>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-sm font-bold text-slate-900">Plan d'accès</Text>
+            <Pressable
+              onPress={openInMaps}
+              className="flex-row items-center bg-indigo-600 rounded-lg px-3 py-1.5"
+              style={{ gap: 4 }}
+            >
+              <Navigation size={12} color="white" />
+              <Text className="text-white text-[11px] font-bold">Y aller</Text>
+            </Pressable>
+          </View>
           <View className="h-52 rounded-2xl overflow-hidden">
             {mapLoading ? (
               <View className="flex-1 items-center justify-center bg-slate-100">

@@ -28,7 +28,7 @@ export default function GeoPingModal() {
         return;
       }
       try {
-        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
         setCoords({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
       } catch {
         setError("Impossible de récupérer votre position.");

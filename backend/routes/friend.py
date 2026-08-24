@@ -121,6 +121,18 @@ async def list_invitations(db=Depends(get_db), current_user=Depends(get_current_
             result.append(format_friend(d, other, "received"))
     return result
 
+@router.get("/sent", response_model=List[FriendResponse])
+async def list_sent_invitations(db=Depends(get_db), current_user=Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    cursor = db["friends"].find({"requester_id": user_id, "status": FriendStatus.pending})
+    docs = await cursor.to_list(length=200)
+    result = []
+    for d in docs:
+        other = await db["users"].find_one({"_id": ObjectId(d["addressee_id"])}) if ObjectId.is_valid(d["addressee_id"]) else None
+        if other:
+            result.append(format_friend(d, other, "sent"))
+    return result
+
 @router.post("/{friend_id}/accept", response_model=FriendResponse)
 async def accept_friend(friend_id: str, db=Depends(get_db), current_user=Depends(get_current_user)):
     doc = await get_friendship_or_404(friend_id, db)

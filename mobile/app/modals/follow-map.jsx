@@ -119,7 +119,7 @@ export default function FollowMapModal() {
               longitudeDelta: 0.02,
             }}
           >
-            <Marker coordinate={myCoords} anchor={{ x: 0.5, y: 0.5 }} flat rotation={heading}>
+            <Marker coordinate={myCoords} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges>
               <View
                 style={{
                   width: 34,
@@ -128,6 +128,7 @@ export default function FollowMapModal() {
                   backgroundColor: "rgba(79,70,229,0.18)",
                   alignItems: "center",
                   justifyContent: "center",
+                  transform: [{ rotate: `${heading}deg` }],
                 }}
               >
                 <Navigation size={18} color={colors.indigo600} fill={colors.indigo600} />

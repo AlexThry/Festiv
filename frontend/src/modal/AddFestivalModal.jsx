@@ -54,25 +54,23 @@ export default function AddFestivalModal({
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&featuretype=settlement&addressdetails=1&limit=5&accept-language=fr`;
-        
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&addressdetails=1&limit=5&accept-language=fr`;
+
         const response = await fetch(url, {
           headers: { 'User-Agent': 'MonAppReact/1.0' }
         });
         const data = await response.json();
-        
-        const formattedCities = data.map(item => {
-          const city = item.address.city || item.address.town || item.address.village || item.display_name.split(',')[0];
-          const country = item.address.country;
-          return {
-            id: item.place_id,
-            label: `${city}, ${country}`,
-          };
-        });
 
-        const uniqueCities = formattedCities.filter((v, i, a) => a.findIndex(t => t.label === v.label) === i);
-        
-        setSuggestions(uniqueCities);
+        const formattedAddresses = data.map(item => ({
+          id: item.place_id,
+          label: item.display_name,
+          lat: item.lat,
+          lon: item.lon,
+        }));
+
+        const uniqueAddresses = formattedAddresses.filter((v, i, a) => a.findIndex(t => t.label === v.label) === i);
+
+        setSuggestions(uniqueAddresses);
       } catch (error) {
         console.error("Erreur lors de la récupération :", error);
       } finally {
@@ -186,7 +184,7 @@ export default function AddFestivalModal({
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl w-full max-w-lg shadow-2xl relative max-h-[90dvh] overflow-y-auto scrollbar-none">
+      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl w-full max-w-lg shadow-2xl relative max-h-[90dvh] overflow-y-auto overflow-x-hidden scrollbar-none">
         <button 
           onClick={() => setShowAddModal(false)}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
@@ -214,11 +212,11 @@ export default function AddFestivalModal({
           </div>
 
           <div className="relative space-y-1">
-            <label className="text-slate-500 font-bold">Lieu / Destination * :</label>
-            <input 
-              type="text" 
+            <label className="text-slate-500 font-bold">Adresse * :</label>
+            <input
+              type="text"
               required
-              placeholder="ex: Paris, France" 
+              placeholder="ex: 12 Rue de la Paix, 75002 Paris"
               value={locationQuery}
               onChange={handleInputChange}
               className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500"
@@ -246,24 +244,24 @@ export default function AddFestivalModal({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <label className="text-slate-500 font-bold">Date de Début * :</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 required
                 value={newFest.start_date}
                 onChange={(e) => setNewFest({ ...newFest, start_date: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
+                className="w-full max-w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <label className="text-slate-500 font-bold">Date de Fin * :</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 required
                 value={newFest.end_date}
                 onChange={(e) => setNewFest({ ...newFest, end_date: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
+                className="w-full max-w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
               />
             </div>
           </div>

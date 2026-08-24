@@ -3,6 +3,7 @@ import { UserPlus, Users, Check, X, Trash2, Loader2 } from "lucide-react";
 import {
   listFriends,
   listFriendInvitations,
+  listSentFriendInvitations,
   addFriend,
   acceptFriend,
   deleteFriend,
@@ -12,6 +13,7 @@ import ToastNotifications from "../components/ToastNotifications";
 export default function FriendsPage() {
   const [friends, setFriends] = useState([]);
   const [invitations, setInvitations] = useState([]);
+  const [sentInvitations, setSentInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [adding, setAdding] = useState(false);
@@ -30,10 +32,15 @@ export default function FriendsPage() {
     let active = true;
     const load = async () => {
       try {
-        const [friendsData, invitesData] = await Promise.all([listFriends(), listFriendInvitations()]);
+        const [friendsData, invitesData, sentData] = await Promise.all([
+          listFriends(),
+          listFriendInvitations(),
+          listSentFriendInvitations(),
+        ]);
         if (!active) return;
         setFriends(friendsData);
         setInvitations(invitesData);
+        setSentInvitations(sentData);
       } catch {
         if (active) triggerToast("Impossible de charger vos amis.", "error");
       } finally {
@@ -84,6 +91,19 @@ export default function FriendsPage() {
       triggerToast("Demande refusée.", "info");
     } catch {
       triggerToast("Erreur lors du refus.", "error");
+    } finally {
+      setRespondingId(null);
+    }
+  };
+
+  const handleCancelSent = async (invite) => {
+    setRespondingId(invite.id);
+    try {
+      await deleteFriend(invite.id);
+      setSentInvitations((prev) => prev.filter((i) => i.id !== invite.id));
+      triggerToast("Demande annulée.", "info");
+    } catch {
+      triggerToast("Erreur lors de l'annulation.", "error");
     } finally {
       setRespondingId(null);
     }
@@ -173,6 +193,32 @@ export default function FriendsPage() {
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {sentInvitations.length > 0 && (
+        <div className="bg-white/70 backdrop-blur-md border border-white/50 shadow-xl shadow-slate-100/50 rounded-3xl p-6 space-y-3">
+          <h2 className="text-[10px] font-bold text-slate-400 uppercase">Demandes envoyées</h2>
+          <div className="space-y-2">
+            {sentInvitations.map((inv) => (
+              <div
+                key={inv.id}
+                className="flex items-center justify-between p-3 bg-slate-100/60 rounded-xl"
+              >
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-slate-800 truncate">{inv.full_name}</p>
+                  <p className="text-[10px] text-slate-500 truncate">En attente d'acceptation</p>
+                </div>
+                <button
+                  onClick={() => handleCancelSent(inv)}
+                  disabled={respondingId === inv.id}
+                  className="shrink-0 text-[11px] font-bold text-rose-600 hover:text-rose-700 disabled:opacity-50"
+                >
+                  Annuler
+                </button>
               </div>
             ))}
           </div>

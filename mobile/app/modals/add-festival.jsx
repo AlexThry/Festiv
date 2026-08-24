@@ -48,15 +48,15 @@ export default function AddFestivalModal() {
     setSearching(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&featuretype=settlement&addressdetails=1&limit=5&accept-language=fr`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&addressdetails=1&limit=5&accept-language=fr`;
         const res = await fetch(url, { headers: { "User-Agent": "FestivMobile/1.0" } });
         const data = await res.json();
-        const formatted = data.map((item) => {
-          const city =
-            item.address.city || item.address.town || item.address.village || item.display_name.split(",")[0];
-          const country = item.address.country;
-          return { id: item.place_id, label: `${city}, ${country}` };
-        });
+        const formatted = data.map((item) => ({
+          id: item.place_id,
+          label: item.display_name,
+          lat: item.lat,
+          lon: item.lon,
+        }));
         const unique = formatted.filter((v, i, a) => a.findIndex((t) => t.label === v.label) === i);
         setSuggestions(unique);
       } catch {
@@ -139,13 +139,13 @@ export default function AddFestivalModal() {
         </View>
 
         <View style={{ gap: 6 }}>
-          <Text className="text-xs font-bold text-slate-500">Lieu / Destination *</Text>
+          <Text className="text-xs font-bold text-slate-500">Adresse *</Text>
           <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5">
             <MapPin size={15} color={colors.slate400} />
             <TextInput
               value={locationQuery}
               onChangeText={handleLocationChange}
-              placeholder="ex: Paris, France"
+              placeholder="ex: 12 Rue de la Paix, 75002 Paris"
               placeholderTextColor={colors.slate400}
               className="flex-1 py-3 px-2.5 text-sm text-slate-800"
             />

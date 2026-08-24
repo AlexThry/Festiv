@@ -18,7 +18,14 @@ import { useToasts } from "../../../src/hooks/useToasts";
 import { useAuth } from "../../../src/context/AuthContext";
 import { useSettingsSheet } from "../../../src/context/SettingsSheetContext";
 import { getInitials } from "../../../src/utils/getInitials";
-import { listFriends, listFriendInvitations, addFriend, acceptFriend, deleteFriend } from "../../../src/api/friend";
+import {
+  listFriends,
+  listFriendInvitations,
+  listSentFriendInvitations,
+  addFriend,
+  acceptFriend,
+  deleteFriend,
+} from "../../../src/api/friend";
 import { colors } from "../../../src/theme/colors";
 import GlassCard from "../../../src/components/GlassCard";
 
@@ -28,6 +35,7 @@ export default function AmisScreen() {
   const { show: showSettings } = useSettingsSheet();
   const [friends, setFriends] = useState([]);
   const [invitations, setInvitations] = useState([]);
+  const [sentInvitations, setSentInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [email, setEmail] = useState("");
@@ -39,9 +47,14 @@ export default function AmisScreen() {
   const load = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setLoading(true);
     try {
-      const [friendsData, invitesData] = await Promise.all([listFriends(), listFriendInvitations()]);
+      const [friendsData, invitesData, sentData] = await Promise.all([
+        listFriends(),
+        listFriendInvitations(),
+        listSentFriendInvitations(),
+      ]);
       setFriends(friendsData);
       setInvitations(invitesData);
+      setSentInvitations(sentData);
     } catch {
       triggerToast("Impossible de charger vos amis.", "error");
     } finally {
@@ -93,6 +106,19 @@ export default function AmisScreen() {
       triggerToast("Demande refusée.", "info");
     } catch {
       triggerToast("Erreur lors du refus.", "error");
+    } finally {
+      setRespondingId(null);
+    }
+  };
+
+  const handleCancelSent = async (invite) => {
+    setRespondingId(invite.id);
+    try {
+      await deleteFriend(invite.id);
+      setSentInvitations((prev) => prev.filter((i) => i.id !== invite.id));
+      triggerToast("Demande annulée.", "info");
+    } catch {
+      triggerToast("Erreur lors de l'annulation.", "error");
     } finally {
       setRespondingId(null);
     }
@@ -223,6 +249,39 @@ export default function AmisScreen() {
                       <X size={14} color={colors.slate600} />
                     </Pressable>
                   </View>
+                </View>
+              ))}
+            </GlassCard>
+          )}
+
+          {sentInvitations.length > 0 && (
+            <GlassCard className="p-5" style={{ gap: 12 }}>
+              <Text className="text-[10px] font-bold text-slate-400 uppercase">
+                Demandes envoyées
+              </Text>
+              {sentInvitations.map((inv) => (
+                <View
+                  key={inv.id}
+                  className="flex-row items-center justify-between bg-slate-50 rounded-xl p-2.5"
+                >
+                  <View className="flex-1 pr-2">
+                    <Text className="text-xs font-semibold text-slate-800" numberOfLines={1}>
+                      {inv.full_name}
+                    </Text>
+                    <Text className="text-[10px] text-slate-500" numberOfLines={1}>
+                      En attente d'acceptation
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => handleCancelSent(inv)}
+                    disabled={respondingId === inv.id}
+                  >
+                    {respondingId === inv.id ? (
+                      <ActivityIndicator size="small" color={colors.slate600} />
+                    ) : (
+                      <Text className="text-[11px] font-bold text-rose-600">Annuler</Text>
+                    )}
+                  </Pressable>
                 </View>
               ))}
             </GlassCard>
