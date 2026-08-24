@@ -47,11 +47,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Compare le mot de passe texte avec le hash de la base de données.
     """
     try:
-        prepared_password = _hash_pre_bcrypt(plain_password)
         hashed_bytes = hashed_password.encode('utf-8')
-        
-        # La fonction native de bcrypt fait la comparaison de manière sécurisée
-        return bcrypt.checkpw(prepared_password, hashed_bytes)
+
+        # Nouveau schéma (avec pré-hachage SHA-256)
+        if bcrypt.checkpw(_hash_pre_bcrypt(plain_password), hashed_bytes):
+            return True
+
+        # Anciens hashs générés avant le passage au pré-hachage (passlib/bcrypt brut)
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_bytes)
     except Exception:
         return False
 

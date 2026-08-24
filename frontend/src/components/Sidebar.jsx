@@ -4,8 +4,8 @@ import { Link, useLocation } from "react-router";
 const TABS = [
   { path: "/", label: "Mon Tableau", icon: Calendar },
   { path: "/lineups", label: "Lineup & Planning", icon: Zap },
-  { path: "/amis", label: "Amis", icon: UserPlus },
   { path: "/suivis", label: "Live", icon: Radar },
+  { path: "/amis", label: "Amis", icon: UserPlus },
 ];
 
 export default function Sidebar() {
