@@ -3,17 +3,19 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from core.database import get_db
 from core.security import get_current_user
-from models.friend import FriendRequest, FriendResponse, FriendStatus
+from models.friend import FriendRequest, FriendResponse, FriendStatus, FriendNicknameUpdate
 from typing import List
 
 router = APIRouter(prefix="/friends", tags=["friends"])
 
-def format_friend(doc, other_user, direction) -> FriendResponse:
+def format_friend(doc, other_user, direction, viewer_id: str) -> FriendResponse:
+    nickname = doc.get("requester_nickname") if doc["requester_id"] == viewer_id else doc.get("addressee_nickname")
     return FriendResponse(
         id=str(doc["_id"]),
         user_id=str(other_user["_id"]),
         email=other_user["email"],
         full_name=other_user["full_name"],
+        nickname=nickname,
         avatar=other_user.get("avatar"),
         status=doc["status"],
         direction=direction,
@@ -90,7 +92,7 @@ async def add_friend(data: FriendRequest, db=Depends(get_db), current_user=Depen
         "created_at": datetime.now(timezone.utc),
     }
     result = await db["friends"].insert_one(doc)
-    return format_friend({**doc, "_id": result.inserted_id}, target, "sent")
+    return format_friend({**doc, "_id": result.inserted_id}, target, "sent", user_id)
 
 @router.get("/mine", response_model=List[FriendResponse])
 async def list_friends(db=Depends(get_db), current_user=Depends(get_current_user)):
@@ -106,7 +108,7 @@ async def list_friends(db=Depends(get_db), current_user=Depends(get_current_user
         other = await db["users"].find_one({"_id": ObjectId(other_id)}) if ObjectId.is_valid(other_id) else None
         if other:
             direction = "sent" if d["requester_id"] == user_id else "received"
-            result.append(format_friend(d, other, direction))
+            result.append(format_friend(d, other, direction, user_id))
     return result
 
 @router.get("/invitations", response_model=List[FriendResponse])
@@ -118,7 +120,7 @@ async def list_invitations(db=Depends(get_db), current_user=Depends(get_current_
     for d in docs:
         other = await db["users"].find_one({"_id": ObjectId(d["requester_id"])}) if ObjectId.is_valid(d["requester_id"]) else None
         if other:
-            result.append(format_friend(d, other, "received"))
+            result.append(format_friend(d, other, "received", user_id))
     return result
 
 @router.get("/sent", response_model=List[FriendResponse])
@@ -130,7 +132,7 @@ async def list_sent_invitations(db=Depends(get_db), current_user=Depends(get_cur
     for d in docs:
         other = await db["users"].find_one({"_id": ObjectId(d["addressee_id"])}) if ObjectId.is_valid(d["addressee_id"]) else None
         if other:
-            result.append(format_friend(d, other, "sent"))
+            result.append(format_friend(d, other, "sent", user_id))
     return result
 
 @router.post("/{friend_id}/accept", response_model=FriendResponse)
@@ -145,7 +147,23 @@ async def accept_friend(friend_id: str, db=Depends(get_db), current_user=Depends
     await db["friends"].update_one({"_id": ObjectId(friend_id)}, {"$set": {"status": FriendStatus.accepted}})
     updated = await db["friends"].find_one({"_id": ObjectId(friend_id)})
     other = await db["users"].find_one({"_id": ObjectId(updated["requester_id"])})
-    return format_friend(updated, other, "received")
+    return format_friend(updated, other, "received", user_id)
+
+@router.patch("/{friend_id}/nickname", response_model=FriendResponse)
+async def set_friend_nickname(friend_id: str, data: FriendNicknameUpdate, db=Depends(get_db), current_user=Depends(get_current_user)):
+    doc = await get_friendship_or_404(friend_id, db)
+    user_id = str(current_user["_id"])
+    ensure_party(doc, user_id)
+
+    field = "requester_nickname" if doc["requester_id"] == user_id else "addressee_nickname"
+    nickname = (data.nickname or "").strip() or None
+    await db["friends"].update_one({"_id": ObjectId(friend_id)}, {"$set": {field: nickname}})
+
+    updated = await db["friends"].find_one({"_id": ObjectId(friend_id)})
+    other_id = updated["addressee_id"] if updated["requester_id"] == user_id else updated["requester_id"]
+    other = await db["users"].find_one({"_id": ObjectId(other_id)})
+    direction = "sent" if updated["requester_id"] == user_id else "received"
+    return format_friend(updated, other, direction, user_id)
 
 @router.delete("/{friend_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_friend(friend_id: str, db=Depends(get_db), current_user=Depends(get_current_user)):

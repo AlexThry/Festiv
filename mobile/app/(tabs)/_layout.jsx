@@ -7,20 +7,20 @@ export default function TabsLayout() {
     <SettingsSheetProvider>
       <NativeTabs>
         <NativeTabs.Trigger name="dashboard">
-          <NativeTabs.Trigger.Label>Mon Tableau</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Label>Mes Festivals</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon sf="calendar" md="event" />
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="lineups">
           <NativeTabs.Trigger.Label>Lineup</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon sf="bolt.fill" md="bolt" />
         </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="suivi">
+          <NativeTabs.Trigger.Label>Live</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon sf="location.fill" md="my_location" />
+        </NativeTabs.Trigger>
         <NativeTabs.Trigger name="amis">
           <NativeTabs.Trigger.Label>Amis</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon sf="person.badge.plus" md="person_add" />
-        </NativeTabs.Trigger>
-        <NativeTabs.Trigger name="suivi">
-          <NativeTabs.Trigger.Label>Live</NativeTabs.Trigger.Label>
-          <NativeTabs.Trigger.Icon sf="person.2.fill" md="group" />
         </NativeTabs.Trigger>
       </NativeTabs>
       <SettingsSheet />

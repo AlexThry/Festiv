@@ -6,3 +6,5 @@ export const listSentFriendInvitations = () => api.get("/friends/sent").then((r)
 export const addFriend = (email) => api.post("/friends", { email }).then((r) => r.data);
 export const acceptFriend = (friendId) => api.post(`/friends/${friendId}/accept`).then((r) => r.data);
 export const deleteFriend = (friendId) => api.delete(`/friends/${friendId}`);
+export const setFriendNickname = (friendId, nickname) =>
+  api.patch(`/friends/${friendId}/nickname`, { nickname: nickname || null }).then((r) => r.data);

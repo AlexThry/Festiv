@@ -19,7 +19,9 @@ export default function FriendPicker({ excludeIds = [], onSelect, placeholder = 
     ? friends.filter(
         (f) =>
           !excluded.has(f.user_id) &&
-          (f.full_name.toLowerCase().includes(q) || f.email.toLowerCase().includes(q)),
+          (f.full_name.toLowerCase().includes(q) ||
+            f.email.toLowerCase().includes(q) ||
+            f.nickname?.toLowerCase().includes(q)),
       )
     : [];
 
@@ -51,7 +53,7 @@ export default function FriendPicker({ excludeIds = [], onSelect, placeholder = 
               >
                 <UserPlus className="w-3.5 h-3.5 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold truncate">{f.full_name}</p>
+                  <p className="text-xs font-semibold truncate">{f.nickname || f.full_name}</p>
                   <p className="text-[10px] text-slate-400 truncate">{f.email}</p>
                 </div>
               </li>

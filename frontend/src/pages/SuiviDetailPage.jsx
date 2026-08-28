@@ -314,7 +314,7 @@ export default function SuiviDetailPage() {
 
   const myPosition = positions.find((p) => p.user_id === user.id && p.target_type);
   const myGeo = positions.find((p) => p.user_id === user.id && p.lat != null);
-  const geoPeople = positions.filter((p) => p.lat != null);
+  const geoPeople = positions.filter((p) => p.lat != null && p.user_id !== user.id);
   const compassTarget = compassTargetId ? positions.find((p) => p.user_id === compassTargetId) : null;
   const mapTarget = mapTargetId ? positions.find((p) => p.user_id === mapTargetId) : null;
   const otherPositions = positions.filter((p) => p.user_id !== user.id);
@@ -549,13 +549,21 @@ export default function SuiviDetailPage() {
                   </div>
 
                   {myGeo ? (
-                    <button
-                      onClick={handleClearGeo}
-                      disabled={clearingGeo}
-                      className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl hover:bg-rose-100 transition text-[11px] font-bold disabled:opacity-50"
-                    >
-                      Arrêter le partage
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowGeoModal(true)}
+                        className="px-3 py-2 bg-slate-100/80 border border-slate-200/60 rounded-xl text-slate-600 hover:bg-white hover:text-indigo-600 transition text-[11px] font-bold"
+                      >
+                        Modifier ma position
+                      </button>
+                      <button
+                        onClick={handleClearGeo}
+                        disabled={clearingGeo}
+                        className="px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl hover:bg-rose-100 transition text-[11px] font-bold disabled:opacity-50"
+                      >
+                        Arrêter le partage
+                      </button>
+                    </div>
                   ) : (
                     <button
                       onClick={() => setShowGeoModal(true)}
@@ -583,27 +591,25 @@ export default function SuiviDetailPage() {
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-semibold text-slate-800 truncate">
-                              {p.user_id === user.id ? "Vous" : p.full_name}
+                              {p.full_name}
                             </p>
                             <p className="text-[10px] text-slate-500">{formatGeoAgo(p.geo_updated_at)}</p>
                           </div>
                         </div>
-                        {p.user_id !== user.id && (
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <button
-                              onClick={() => setMapTargetId(p.user_id)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white rounded-lg text-[10px] font-bold transition"
-                            >
-                              <MapIcon className="w-3.5 h-3.5" /> Carte
-                            </button>
-                            <button
-                              onClick={() => setCompassTargetId(p.user_id)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold transition"
-                            >
-                              <Compass className="w-3.5 h-3.5" /> Boussole
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => setMapTargetId(p.user_id)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white rounded-lg text-[10px] font-bold transition"
+                          >
+                            <MapIcon className="w-3.5 h-3.5" /> Carte
+                          </button>
+                          <button
+                            onClick={() => setCompassTargetId(p.user_id)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold transition"
+                          >
+                            <Compass className="w-3.5 h-3.5" /> Boussole
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

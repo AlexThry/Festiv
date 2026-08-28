@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useFocusEffect } from "expo-router";
-import { UserPlus, Check, X, Trash2, Users } from "lucide-react-native";
+import { UserPlus, Check, X, Trash2, Users, Pencil } from "lucide-react-native";
 import ToastStack from "../../../src/components/ToastStack";
 import { HeaderAvatarButton } from "../../../src/components/nav/HeaderButtons";
 import { useToasts } from "../../../src/hooks/useToasts";
@@ -25,6 +25,7 @@ import {
   addFriend,
   acceptFriend,
   deleteFriend,
+  setFriendNickname,
 } from "../../../src/api/friend";
 import { colors } from "../../../src/theme/colors";
 import GlassCard from "../../../src/components/GlassCard";
@@ -42,6 +43,9 @@ export default function AmisScreen() {
   const [adding, setAdding] = useState(false);
   const [respondingId, setRespondingId] = useState(null);
   const [removingId, setRemovingId] = useState(null);
+  const [editingNicknameId, setEditingNicknameId] = useState(null);
+  const [nicknameInput, setNicknameInput] = useState("");
+  const [savingNickname, setSavingNickname] = useState(false);
   const [toasts, triggerToast] = useToasts();
 
   const load = useCallback(async (isRefresh = false) => {
@@ -121,6 +125,25 @@ export default function AmisScreen() {
       triggerToast("Erreur lors de l'annulation.", "error");
     } finally {
       setRespondingId(null);
+    }
+  };
+
+  const startEditNickname = (friend) => {
+    setEditingNicknameId(friend.id);
+    setNicknameInput(friend.nickname || "");
+  };
+
+  const handleSaveNickname = async (friend) => {
+    setSavingNickname(true);
+    try {
+      const updated = await setFriendNickname(friend.id, nicknameInput.trim());
+      setFriends((prev) => prev.map((f) => (f.id === friend.id ? updated : f)));
+      setEditingNicknameId(null);
+      triggerToast("Pseudo mis à jour.", "success");
+    } catch {
+      triggerToast("Erreur lors de la mise à jour du pseudo.", "error");
+    } finally {
+      setSavingNickname(false);
     }
   };
 
@@ -297,28 +320,60 @@ export default function AmisScreen() {
                 Aucun ami pour l'instant. Ajoutez-en un via son email.
               </Text>
             ) : (
-              friends.map((f) => (
-                <View
-                  key={f.id}
-                  className="flex-row items-center justify-between bg-slate-50 rounded-xl p-2.5"
-                >
-                  <View className="flex-1 pr-2">
-                    <Text className="text-xs font-semibold text-slate-800" numberOfLines={1}>
-                      {f.full_name}
-                    </Text>
-                    <Text className="text-[10px] text-slate-500" numberOfLines={1}>
-                      {f.email}
-                    </Text>
+              friends.map((f) =>
+                editingNicknameId === f.id ? (
+                  <View
+                    key={f.id}
+                    className="flex-row items-center bg-slate-50 rounded-xl p-2.5"
+                    style={{ gap: 8 }}
+                  >
+                    <TextInput
+                      autoFocus
+                      value={nicknameInput}
+                      onChangeText={setNicknameInput}
+                      placeholder={f.full_name}
+                      placeholderTextColor={colors.slate400}
+                      className="flex-1 bg-white border border-indigo-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800"
+                    />
+                    <Pressable onPress={() => handleSaveNickname(f)} disabled={savingNickname}>
+                      {savingNickname ? (
+                        <ActivityIndicator size="small" color={colors.emerald700} />
+                      ) : (
+                        <Check size={16} color={colors.emerald700} />
+                      )}
+                    </Pressable>
+                    <Pressable onPress={() => setEditingNicknameId(null)}>
+                      <X size={16} color={colors.slate600} />
+                    </Pressable>
                   </View>
-                  <Pressable onPress={() => handleRemoveFriend(f)} disabled={removingId === f.id}>
-                    {removingId === f.id ? (
-                      <ActivityIndicator size="small" color={colors.rose600} />
-                    ) : (
-                      <Trash2 size={15} color={colors.rose600} />
-                    )}
-                  </Pressable>
-                </View>
-              ))
+                ) : (
+                  <View
+                    key={f.id}
+                    className="flex-row items-center justify-between bg-slate-50 rounded-xl p-2.5"
+                  >
+                    <View className="flex-1 pr-2">
+                      <Text className="text-xs font-semibold text-slate-800" numberOfLines={1}>
+                        {f.nickname || f.full_name}
+                      </Text>
+                      <Text className="text-[10px] text-slate-500" numberOfLines={1}>
+                        {f.nickname ? f.full_name : f.email}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center" style={{ gap: 12 }}>
+                      <Pressable onPress={() => startEditNickname(f)}>
+                        <Pencil size={15} color={colors.slate400} />
+                      </Pressable>
+                      <Pressable onPress={() => handleRemoveFriend(f)} disabled={removingId === f.id}>
+                        {removingId === f.id ? (
+                          <ActivityIndicator size="small" color={colors.rose600} />
+                        ) : (
+                          <Trash2 size={15} color={colors.rose600} />
+                        )}
+                      </Pressable>
+                    </View>
+                  </View>
+                ),
+              )
             )}
           </GlassCard>
         </ScrollView>

@@ -2,7 +2,7 @@ import { Calendar, Zap, UserPlus, Radar } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 const TABS = [
-  { path: "/", label: "Mon Tableau", icon: Calendar },
+  { path: "/", label: "Mes Festivals", icon: Calendar },
   { path: "/lineups", label: "Lineup & Planning", icon: Zap },
   { path: "/suivis", label: "Live", icon: Radar },
   { path: "/amis", label: "Amis", icon: UserPlus },

@@ -26,7 +26,9 @@ export default function FriendPicker({
     ? friends.filter(
         (f) =>
           !excluded.has(f.user_id) &&
-          (f.full_name.toLowerCase().includes(q) || f.email.toLowerCase().includes(q)),
+          (f.full_name.toLowerCase().includes(q) ||
+            f.email.toLowerCase().includes(q) ||
+            f.nickname?.toLowerCase().includes(q)),
       )
     : [];
 
@@ -61,7 +63,7 @@ export default function FriendPicker({
                 <UserPlus size={13} color={tintColor || colors.indigo600} />
                 <View className="flex-1">
                   <Text className="text-xs font-semibold text-slate-800" numberOfLines={1}>
-                    {f.full_name}
+                    {f.nickname || f.full_name}
                   </Text>
                   <Text className="text-[10px] text-slate-500" numberOfLines={1}>
                     {f.email}

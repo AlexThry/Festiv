@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { UserPlus, Users, Check, X, Trash2, Loader2 } from "lucide-react";
+import { UserPlus, Users, Check, X, Trash2, Loader2, Pencil } from "lucide-react";
 import {
   listFriends,
   listFriendInvitations,
@@ -7,6 +7,7 @@ import {
   addFriend,
   acceptFriend,
   deleteFriend,
+  setFriendNickname,
 } from "../api/friend";
 import ToastNotifications from "../components/ToastNotifications";
 
@@ -20,6 +21,9 @@ export default function FriendsPage() {
   const [respondingId, setRespondingId] = useState(null);
   const [removingId, setRemovingId] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [editingNicknameId, setEditingNicknameId] = useState(null);
+  const [nicknameInput, setNicknameInput] = useState("");
+  const [savingNickname, setSavingNickname] = useState(false);
 
   const [toasts, setToasts] = useState([]);
   const triggerToast = (message, type = "info") => {
@@ -106,6 +110,25 @@ export default function FriendsPage() {
       triggerToast("Erreur lors de l'annulation.", "error");
     } finally {
       setRespondingId(null);
+    }
+  };
+
+  const startEditNickname = (friend) => {
+    setEditingNicknameId(friend.id);
+    setNicknameInput(friend.nickname || "");
+  };
+
+  const handleSaveNickname = async (friend) => {
+    setSavingNickname(true);
+    try {
+      const updated = await setFriendNickname(friend.id, nicknameInput.trim());
+      setFriends((prev) => prev.map((f) => (f.id === friend.id ? updated : f)));
+      setEditingNicknameId(null);
+      triggerToast("Pseudo mis à jour.", "success");
+    } catch {
+      triggerToast("Erreur lors de la mise à jour du pseudo.", "error");
+    } finally {
+      setSavingNickname(false);
     }
   };
 
@@ -241,22 +264,66 @@ export default function FriendsPage() {
                 key={f.id}
                 className="flex items-center justify-between p-3 bg-slate-100/60 rounded-xl"
               >
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-slate-800 truncate">{f.full_name}</p>
-                  <p className="text-[10px] text-slate-500 truncate">{f.email}</p>
-                </div>
-                <button
-                  onClick={() => handleRemove(f)}
-                  disabled={removingId === f.id}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 disabled:opacity-50 shrink-0"
-                  title="Retirer"
-                >
-                  {removingId === f.id ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-3.5 h-3.5" />
-                  )}
-                </button>
+                {editingNicknameId === f.id ? (
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder={f.full_name}
+                      value={nicknameInput}
+                      onChange={(e) => setNicknameInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveNickname(f)}
+                      className="flex-1 min-w-0 bg-white border border-indigo-300 px-2.5 py-1.5 rounded-lg text-xs text-slate-800 focus:outline-none"
+                    />
+                    <button
+                      onClick={() => handleSaveNickname(f)}
+                      disabled={savingNickname}
+                      className="p-1.5 text-emerald-600 hover:text-emerald-700 disabled:opacity-50 shrink-0"
+                      title="Enregistrer"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setEditingNicknameId(null)}
+                      className="p-1.5 text-slate-400 hover:text-slate-600 shrink-0"
+                      title="Annuler"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-slate-800 truncate">
+                        {f.nickname || f.full_name}
+                      </p>
+                      <p className="text-[10px] text-slate-500 truncate">
+                        {f.nickname ? f.full_name : f.email}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => startEditNickname(f)}
+                        className="p-1.5 text-slate-400 hover:text-indigo-600"
+                        title="Donner un pseudo"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleRemove(f)}
+                        disabled={removingId === f.id}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 disabled:opacity-50"
+                        title="Retirer"
+                      >
+                        {removingId === f.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>

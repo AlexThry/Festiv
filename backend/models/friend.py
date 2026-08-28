@@ -12,6 +12,8 @@ class FriendInDB(BaseModel):
     requester_id: str
     addressee_id: str
     status: FriendStatus = FriendStatus.pending
+    requester_nickname: Optional[str] = None
+    addressee_nickname: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class FriendResponse(BaseModel):
@@ -19,6 +21,7 @@ class FriendResponse(BaseModel):
     user_id: str
     email: str
     full_name: str
+    nickname: Optional[str] = None
     avatar: Optional[str] = None
     status: FriendStatus
     direction: str
@@ -26,3 +29,6 @@ class FriendResponse(BaseModel):
 
 class FriendRequest(BaseModel):
     email: EmailStr
+
+class FriendNicknameUpdate(BaseModel):
+    nickname: Optional[str] = None

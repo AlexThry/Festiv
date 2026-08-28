@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Build sideloadable .ipa without Apple Dev Program license.
+# Build sideloadable .zip (Payload/App.app) without Apple Dev Program license.
 # Automates the manual steps from Readme.md: prebuild, pod install,
-# xcodebuild archive, then repack the .app into a Payload/.ipa.
+# xcodebuild archive, then repack the .app into a Payload/.zip.
 #
 # Usage:
-#   scripts/build-ipa.sh -t TEAM_ID [-o output.ipa] [-c Release]
+#   scripts/build-ipa.sh -t TEAM_ID [-o output.zip] [-c Release]
 #   TEAM_ID: 254626Q9MG
 #
 # TEAM_ID: your Apple ID "Personal Team" id, found in Xcode ->
@@ -20,17 +20,17 @@ APP_NAME="Festiv"
 SCHEME="Festiv"
 CONFIGURATION="Release"
 TEAM_ID=""
-OUTPUT_IPA=""
+OUTPUT_ZIP=""
 
 usage() {
-  echo "Usage: $0 -t TEAM_ID [-o output.ipa] [-c Release]"
+  echo "Usage: $0 -t TEAM_ID [-o output.zip] [-c Release]"
   exit 1
 }
 
 while getopts "t:o:c:h" opt; do
   case "$opt" in
     t) TEAM_ID="$OPTARG" ;;
-    o) OUTPUT_IPA="$OPTARG" ;;
+    o) OUTPUT_ZIP="$OPTARG" ;;
     c) CONFIGURATION="$OPTARG" ;;
     h) usage ;;
     *) usage ;;
@@ -42,10 +42,10 @@ if [ -z "$TEAM_ID" ]; then
   usage
 fi
 
-if [ -z "$OUTPUT_IPA" ]; then
-  OUTPUT_IPA="$MOBILE_DIR/build/${APP_NAME}-$(date +%Y%m%d-%H%M%S).ipa"
+if [ -z "$OUTPUT_ZIP" ]; then
+  OUTPUT_ZIP="$MOBILE_DIR/build/${APP_NAME}-$(date +%Y%m%d-%H%M%S).zip"
 fi
-mkdir -p "$(dirname "$OUTPUT_IPA")"
+mkdir -p "$(dirname "$OUTPUT_ZIP")"
 
 echo "==> Nettoyage ios/ et DerivedData"
 rm -rf "$MOBILE_DIR/ios"
@@ -79,13 +79,13 @@ if [ ! -d "$APP_PATH" ]; then
   exit 1
 fi
 
-echo "==> Packaging .ipa"
+echo "==> Packaging .zip"
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "$WORK_DIR"' EXIT
 mkdir "$WORK_DIR/Payload"
 cp -R "$APP_PATH" "$WORK_DIR/Payload/"
-(cd "$WORK_DIR" && zip -qry "$OUTPUT_IPA" Payload)
+(cd "$WORK_DIR" && zip -qry "$OUTPUT_ZIP" Payload)
 rm -rf "$ARCHIVE_PATH"
 
-echo "==> Terminé: $OUTPUT_IPA"
+echo "==> Terminé: $OUTPUT_ZIP"
 echo "Installe-le via un sideloader (AltStore, Sideloadly, ...)."

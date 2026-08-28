@@ -41,3 +41,12 @@ export const acceptFriend = async (friendId) => {
 export const deleteFriend = async (friendId) => {
   await axios.delete(`${BASE}/friends/${friendId}`, { headers: authHeaders() });
 };
+
+export const setFriendNickname = async (friendId, nickname) => {
+  const response = await axios.patch(
+    `${BASE}/friends/${friendId}/nickname`,
+    { nickname: nickname || null },
+    { headers: authHeaders() },
+  );
+  return response.data;
+};

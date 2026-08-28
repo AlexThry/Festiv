@@ -261,6 +261,7 @@ export default function FestivalDetailScreen() {
               <Text className="text-white text-[11px] font-bold">Y aller</Text>
             </Pressable>
           </View>
+          <Text className="text-xs font-medium text-slate-600">{festival.location}</Text>
           <View className="h-52 rounded-2xl overflow-hidden">
             {mapLoading ? (
               <View className="flex-1 items-center justify-center bg-slate-100">

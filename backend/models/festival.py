@@ -2,6 +2,18 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from datetime import datetime, timezone
 from enum import Enum
+import re
+
+# Adresse standard attendue à la création d'un festival : "numéro rue, code postal ville"
+# (la virgule est optionnelle) - ex: "12 Rue de la Paix, 75002 Paris"
+ADDRESS_RE = re.compile(r"^\d+\s+[^,]+,?\s*\d{5}\s+.+$")
+ADDRESS_FORMAT_ERROR = (
+    "L'adresse doit être au format : numéro rue, code postal ville "
+    "(ex: 12 Rue de la Paix, 75002 Paris)"
+)
+
+def is_standard_address(location: str) -> bool:
+    return bool(ADDRESS_RE.match(location.strip()))
 
 # ==========================================
 # 1. MODÈLES ARTISTE (Artist)

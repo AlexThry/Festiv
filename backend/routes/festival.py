@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from core.database import get_db
 from core.security import get_current_user
-from models.festival import FestivalCreateRequest, FestivalResponse
+from models.festival import FestivalCreateRequest, FestivalResponse, is_standard_address, ADDRESS_FORMAT_ERROR
 from routes.lineup import cascade_delete_lineup
 from routes.suivi import cascade_delete_suivi
 from routes.friend import get_friend_ids
@@ -49,7 +49,10 @@ async def create_festival(festival_data: str = Form(...), file: UploadFile = Fil
         data = FestivalCreateRequest.model_validate_json(festival_data)
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.errors())
-    
+
+    if not is_standard_address(data.location):
+        raise HTTPException(status_code=422, detail=ADDRESS_FORMAT_ERROR)
+
     cover_image_url = str(data.cover_image_url) if data.cover_image_url else None
 
     if file:

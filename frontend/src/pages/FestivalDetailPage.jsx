@@ -368,6 +368,7 @@ export default function FestivalDetailPage() {
                 <span>Y aller</span>
               </a>
             </div>
+            <p className="px-0.5 text-xs font-medium text-slate-600">{festival.location}</p>
             <div className="h-64 rounded-2xl overflow-hidden border border-slate-100 relative z-0">
               {mapLoading ? (
                 <div className="w-full h-full bg-slate-100 animate-pulse flex items-center justify-center text-slate-400 text-xs">

@@ -300,7 +300,7 @@ export default function SuiviDetailScreen() {
 
   const myPosition = positions.find((p) => p.user_id === user.id && p.target_type);
   const myGeo = positions.find((p) => p.user_id === user.id && p.lat != null);
-  const geoPeople = positions.filter((p) => p.lat != null);
+  const geoPeople = positions.filter((p) => p.lat != null && p.user_id !== user.id);
   const setById = Object.fromEntries(sets.map((s) => [s.id, s]));
   const nameByUserId = Object.fromEntries(positions.map((p) => [p.user_id, p.full_name]));
 
@@ -523,9 +523,16 @@ export default function SuiviDetailScreen() {
                   <Text className="text-sm font-bold text-slate-900">Localisation live</Text>
                 </View>
                 {myGeo ? (
-                  <Pressable onPress={handleClearGeo} disabled={clearingGeo}>
-                    <Text className="text-[11px] font-bold text-rose-600">Arrêter le partage</Text>
-                  </Pressable>
+                  <View className="flex-row items-center" style={{ gap: 14 }}>
+                    <Pressable
+                      onPress={() => router.push({ pathname: "/modals/geo-ping", params: { suiviId: id } })}
+                    >
+                      <Text className="text-[11px] font-bold text-slate-600">Modifier</Text>
+                    </Pressable>
+                    <Pressable onPress={handleClearGeo} disabled={clearingGeo}>
+                      <Text className="text-[11px] font-bold text-rose-600">Arrêter le partage</Text>
+                    </Pressable>
+                  </View>
                 ) : (
                   <Pressable
                     onPress={() => router.push({ pathname: "/modals/geo-ping", params: { suiviId: id } })}
@@ -565,41 +572,39 @@ export default function SuiviDetailScreen() {
                       </View>
                       <View className="flex-1">
                         <Text className="text-xs font-semibold text-slate-800" numberOfLines={1}>
-                          {p.user_id === user.id ? "Vous" : p.full_name}
+                          {p.full_name}
                         </Text>
                         <Text className="text-[10px] text-slate-500">{formatGeoAgo(p.geo_updated_at)}</Text>
                       </View>
                     </View>
-                    {p.user_id !== user.id && (
-                      <View className="flex-row" style={{ gap: 6 }}>
-                        <Pressable
-                          onPress={() =>
-                            router.push({
-                              pathname: "/modals/follow-map",
-                              params: { suiviId: id, targetUserId: p.user_id, targetName: p.full_name },
-                            })
-                          }
-                          className="flex-row items-center bg-fuchsia-600 rounded-lg px-2.5 py-1.5"
-                          style={{ gap: 4 }}
-                        >
-                          <MapIcon size={13} color="white" />
-                          <Text className="text-white text-[10px] font-bold">Carte</Text>
-                        </Pressable>
-                        <Pressable
-                          onPress={() =>
-                            router.push({
-                              pathname: "/modals/compass",
-                              params: { suiviId: id, targetUserId: p.user_id, targetName: p.full_name },
-                            })
-                          }
-                          className="flex-row items-center bg-indigo-600 rounded-lg px-2.5 py-1.5"
-                          style={{ gap: 4 }}
-                        >
-                          <Compass size={13} color="white" />
-                          <Text className="text-white text-[10px] font-bold">Boussole</Text>
-                        </Pressable>
-                      </View>
-                    )}
+                    <View className="flex-row" style={{ gap: 6 }}>
+                      <Pressable
+                        onPress={() =>
+                          router.push({
+                            pathname: "/modals/follow-map",
+                            params: { suiviId: id, targetUserId: p.user_id, targetName: p.full_name },
+                          })
+                        }
+                        className="flex-row items-center bg-fuchsia-600 rounded-lg px-2.5 py-1.5"
+                        style={{ gap: 4 }}
+                      >
+                        <MapIcon size={13} color="white" />
+                        <Text className="text-white text-[10px] font-bold">Carte</Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() =>
+                          router.push({
+                            pathname: "/modals/compass",
+                            params: { suiviId: id, targetUserId: p.user_id, targetName: p.full_name },
+                          })
+                        }
+                        className="flex-row items-center bg-indigo-600 rounded-lg px-2.5 py-1.5"
+                        style={{ gap: 4 }}
+                      >
+                        <Compass size={13} color="white" />
+                        <Text className="text-white text-[10px] font-bold">Boussole</Text>
+                      </Pressable>
+                    </View>
                   </View>
                 ))
               )}
