@@ -23,17 +23,32 @@ import { HeaderCloseButton } from "../../src/components/nav/HeaderButtons";
 
 const pad = (n) => String(n).padStart(2, "0");
 const toHM = (date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+const toYMD = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+const getFestivalDays = (start, end) => {
+  if (!start || !end) return [];
+  const s = new Date(`${String(start).slice(0, 10)}T00:00:00`);
+  const e = new Date(`${String(end).slice(0, 10)}T00:00:00`);
+  const days = [];
+  for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+    days.push(toYMD(d));
+  }
+  return days;
+};
 
 export default function SetFormModal() {
-  const { lineupId, setId } = useLocalSearchParams();
+  const { lineupId, setId, festivalStart, festivalEnd } = useLocalSearchParams();
   const router = useRouter();
+  const festivalDays = getFestivalDays(festivalStart, festivalEnd);
 
   const [loading, setLoading] = useState(true);
   const [stages, setStages] = useState([]);
   const [artists, setArtists] = useState([]);
 
   const [name, setName] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(() =>
+    festivalDays.length > 0 ? new Date(`${festivalDays[0]}T00:00:00`) : new Date(),
+  );
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date(Date.now() + 60 * 60 * 1000));
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -176,26 +191,55 @@ export default function SetFormModal() {
 
           <View style={{ gap: 6 }}>
             <Text className="text-xs font-bold text-slate-500">Date *</Text>
-            <Pressable
-              onPress={() => setShowDatePicker(true)}
-              className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3"
-              style={{ gap: 8 }}
-            >
-              <Calendar size={15} color={colors.slate400} />
-              <Text className="text-sm font-semibold text-slate-800">
-                {date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-              </Text>
-            </Pressable>
-            {showDatePicker && (
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display={Platform.OS === "ios" ? "inline" : "default"}
-                onChange={(e, d) => {
-                  setShowDatePicker(false);
-                  if (d) setDate(d);
-                }}
-              />
+            {festivalDays.length > 0 ? (
+              <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                {festivalDays.map((day) => {
+                  const selected = toYMD(date) === day;
+                  const [, m, d] = day.split("-");
+                  return (
+                    <Pressable
+                      key={day}
+                      onPress={() => setDate(new Date(`${day}T00:00:00`))}
+                      className="rounded-xl px-3.5 py-2.5 border"
+                      style={{
+                        borderColor: selected ? colors.indigo600 : colors.slate200,
+                        backgroundColor: selected ? "#eef2ff" : colors.slate50,
+                      }}
+                    >
+                      <Text
+                        className="text-sm font-bold"
+                        style={{ color: selected ? colors.indigo700 : colors.slate700 }}
+                      >
+                        {d}/{m}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : (
+              <>
+                <Pressable
+                  onPress={() => setShowDatePicker(true)}
+                  className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3"
+                  style={{ gap: 8 }}
+                >
+                  <Calendar size={15} color={colors.slate400} />
+                  <Text className="text-sm font-semibold text-slate-800">
+                    {date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                  </Text>
+                </Pressable>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "inline" : "default"}
+                    onChange={(e, d) => {
+                      setShowDatePicker(false);
+                      if (d) setDate(d);
+                    }}
+                  />
+                )}
+              </>
             )}
           </View>
 

@@ -397,7 +397,16 @@ export default function LineupDetailScreen() {
                   </Pressable>
                   {canEdit && (
                     <Pressable
-                      onPress={() => router.push(`/modals/set-form?lineupId=${id}`)}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/modals/set-form",
+                          params: {
+                            lineupId: id,
+                            festivalStart: festival?.start_date,
+                            festivalEnd: festival?.end_date,
+                          },
+                        })
+                      }
                       className="bg-indigo-600 rounded-lg px-3 py-2 flex-row items-center"
                       style={{ gap: 4 }}
                     >
@@ -445,7 +454,15 @@ export default function LineupDetailScreen() {
                           <View className="flex-row" style={{ gap: 4 }}>
                             <Pressable
                               onPress={() =>
-                                router.push(`/modals/set-form?lineupId=${id}&setId=${s.id}`)
+                                router.push({
+                                  pathname: "/modals/set-form",
+                                  params: {
+                                    lineupId: id,
+                                    setId: s.id,
+                                    festivalStart: festival?.start_date,
+                                    festivalEnd: festival?.end_date,
+                                  },
+                                })
                               }
                               className="p-2"
                             >

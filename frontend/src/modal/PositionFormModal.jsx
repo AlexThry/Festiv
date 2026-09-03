@@ -107,20 +107,38 @@ export default function PositionFormModal({
                   Aucun set programmé dans les lineups de ce suivi.
                 </p>
               ) : (
-                <select
-                  value={setId}
-                  onChange={(e) => setSetId(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="">Sélectionner un set</option>
-                  {sets.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name || s.artists.map((a) => a.name).join(" B2B ") || "Set"}
-                      {s.stage ? ` — ${s.stage.name}` : ""}
-                      {s.start_time ? ` — ${s.start_time.slice(11, 16)}` : ""}
-                    </option>
-                  ))}
-                </select>
+                <div className="space-y-1.5 max-h-64 overflow-y-auto scrollbar-none pr-1">
+                  {sets.map((s) => {
+                    const selected = setId === s.id;
+                    return (
+                      <button
+                        type="button"
+                        key={s.id}
+                        onClick={() => setSetId(s.id)}
+                        className={`w-full text-left rounded-xl border px-4 py-3 transition ${
+                          selected
+                            ? "border-indigo-600 bg-indigo-50"
+                            : "border-slate-200 bg-slate-50 hover:border-indigo-200"
+                        }`}
+                      >
+                        <p
+                          className={`text-sm font-semibold ${
+                            selected ? "text-indigo-700" : "text-slate-700"
+                          }`}
+                        >
+                          {s.name || s.artists.map((a) => a.name).join(" B2B ") || "Set"}
+                        </p>
+                        {(s.stage || s.start_time) && (
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            {[s.stage?.name, s.start_time?.slice(11, 16)]
+                              .filter(Boolean)
+                              .join(" — ")}
+                          </p>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
             </div>
           ) : (

@@ -5,7 +5,7 @@ import { listArtists } from "../../api/artist";
 import SetFormModal from "../../modal/SetFormModal";
 import ToastNotifications from "../ToastNotifications";
 
-export default function LineupSection({ lineupId, readOnly = false }) {
+export default function LineupSection({ lineupId, readOnly = false, festival }) {
   const [stages, setStages] = useState([]);
   const [artists, setArtists] = useState([]);
   const [sets, setSets] = useState([]);
@@ -263,6 +263,7 @@ export default function LineupSection({ lineupId, readOnly = false }) {
       {showModal && !readOnly && (
         <SetFormModal
           lineupId={lineupId}
+          festival={festival}
           stages={stages}
           setStages={setStages}
           artists={artists}

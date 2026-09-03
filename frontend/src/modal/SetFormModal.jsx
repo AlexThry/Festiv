@@ -6,8 +6,23 @@ import { createArtist } from "../api/artist";
 const toDate = (iso) => (iso ? iso.slice(0, 10) : "");
 const toTime = (iso) => (iso ? iso.slice(11, 16) : "");
 
+const pad = (n) => String(n).padStart(2, "0");
+const toYMD = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+const getFestivalDays = (festival) => {
+  if (!festival?.start_date || !festival?.end_date) return [];
+  const start = new Date(`${festival.start_date.slice(0, 10)}T00:00:00`);
+  const end = new Date(`${festival.end_date.slice(0, 10)}T00:00:00`);
+  const days = [];
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    days.push(toYMD(d));
+  }
+  return days;
+};
+
 export default function SetFormModal({
   lineupId,
+  festival,
   stages,
   setStages,
   artists,
@@ -17,6 +32,7 @@ export default function SetFormModal({
   onSaved,
   triggerToast,
 }) {
+  const festivalDays = getFestivalDays(festival);
   const [form, setForm] = useState(
     initialSet
       ? {
@@ -180,13 +196,38 @@ export default function SetFormModal({
           </div>
 
           <div className="space-y-1">
-            <label className="text-slate-500 font-bold">Date (optionnel) :</label>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
-              className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
-            />
+            <label className="text-slate-500 font-bold">
+              Date {festivalDays.length > 0 ? "" : "(optionnel)"} :
+            </label>
+            {festivalDays.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {festivalDays.map((day) => {
+                  const selected = form.date === day;
+                  const [, m, d] = day.split("-");
+                  return (
+                    <button
+                      type="button"
+                      key={day}
+                      onClick={() => setForm((prev) => ({ ...prev, date: day }))}
+                      className={`rounded-xl px-3.5 py-2.5 border text-sm font-bold transition ${
+                        selected
+                          ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                          : "border-slate-200 bg-slate-50 text-slate-700 hover:border-indigo-200"
+                      }`}
+                    >
+                      {d}/{m}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
+                className="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-500 font-semibold"
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
